@@ -2,7 +2,15 @@
   "mcpServers": {
     "socraticode": {
       "command": "npx",
-      "args": ["-y", "socraticode"]
+      "args": ["-y", "socraticode"],
+      "env": {
+        "EMBEDDING_PROVIDER": "litellm",
+        "LITELLM_URL": "http://localhost:4000/v1",
+        "LITELLM_API_KEY": "api-key-is-ignored",
+        "LITELLM_SEND_DIMENSIONS": "true",
+        "EMBEDDING_MODEL": "gemini-embedding-001",
+        "EMBEDDING_DIMENSIONS": "3072"
+      }
     }
   }
 }

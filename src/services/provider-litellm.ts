@@ -108,10 +108,20 @@ export function resetLiteLLMClient(): void {
 
 // ── Pre-truncation ──────────────────────────────────────────────────────
 
+// Remove unpaired UTF-16 surrogates (U+D800–U+DFFF). These arise when Node.js
+// reads CESU-8 encoded files or when substring() splits a surrogate pair. Python's
+// httpx cannot serialize them to JSON (UnicodeEncodeError), crashing the embed call.
+function stripSurrogates(s: string): string {
+  return s.replace(/[\uD800-\uDFFF]/g, "");
+}
+
 function pretruncateTexts(texts: string[], contextLength: number): string[] {
-  if (contextLength <= 0) return texts;
+  if (contextLength <= 0) return texts.map(stripSurrogates);
   const maxChars = Math.floor(contextLength * CHARS_PER_TOKEN_ESTIMATE);
-  return texts.map((t) => (t.length > maxChars ? t.substring(0, maxChars) : t));
+  return texts.map((t) => {
+    const safe = stripSurrogates(t);
+    return safe.length > maxChars ? safe.substring(0, maxChars) : safe;
+  });
 }
 
 // ── Auth-error detection ────────────────────────────────────────────────
